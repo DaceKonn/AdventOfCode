@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
-const file string = "input_test.txt"
+const file string = "input_real.txt"
 
 const (
 	unknwon = iota
@@ -59,12 +60,29 @@ func main() {
 
 	headerLog(0, "read numbers")
 	partNumbers := readNumber(matrix, typeMatrix, width, height)
-	log("part numbers:\t", partNumbers)
+	log("part numbers:")
+
+	sortedKeys := make([]int, 0, len(partNumbers))
+	for key := range partNumbers {
+		sortedKeys = append(sortedKeys, key)
+	}
+	slices.Sort(sortedKeys)
+
+	for key := range sortedKeys {
+		log("id:\t", key, "\tnumbers:\t", partNumbers[key])
+	}
 
 	headerLog(0, "result")
 	var result int = 0
-	for _, num := range partNumbers {
-		result += num
+	for _, numA := range partNumbers {
+		if len(numA) != 2 {
+			continue
+		}
+		pr := 1
+		for _, num := range numA {
+			pr *= num
+		}
+		result += pr
 	}
 	log(result)
 }
@@ -74,35 +92,52 @@ type markedRune struct {
 	id int
 }
 
-func readNumber(matrix [][]rune, typeMatrix [][]int, width, height int) (numbers map[int]int) {
-	numbers = make(map[int]int)
+type numberId struct {
+	rawNumber string
+	id        int
+}
+
+func readNumber(matrix [][]rune, typeMatrix [][]int, width, height int) (numbers map[int][]int) {
+	numbers = make(map[int][]int)
 	for h := range height {
 		rawParts := make([]markedRune, 0)
 		for w := range width {
 			switch {
 			case typeMatrix[h][w] >= 4000:
 				rawParts = append(rawParts, markedRune{r: matrix[h][w], id: typeMatrix[h][w] - 4000})
-				// default:
-				// rawParts = append(rawParts, '.')
+			case typeMatrix[h][w] < 4000 && w > 0 && typeMatrix[h][w-1] >= 4000:
+				rawParts = append(rawParts, markedRune{r: matrix[h][w], id: -1})
 			}
 		}
 		if len(rawParts) == 0 {
 			continue
 		}
 		log(rawParts)
-		var currentId int = -1
-		currentLine := ""
-		for _, mr := range rawParts {
-			if currentId == -1 {
-				currentId = mr.id
+
+		ids := make([]int, 0)
+		for _, rp := range rawParts {
+			if slices.Contains(ids, rp.id) || rp.id == -1 {
+				continue
 			}
-			if mr.id != currentId || h == height-1 {
-				log("cl: ", currentLine)
-				numbers[currentId] = parseInt(currentLine)
-				currentLine = ""
-				currentId = mr.id
+			ids = append(ids, rp.id)
+		}
+		slices.Sort(ids)
+
+		cnid := numberId{id: -1}
+		for indx, rp := range rawParts {
+			if cnid.id == -1 && rp.id != -1 {
+				cnid.id = rp.id
 			}
-			currentLine = strings.Join([]string{currentLine, string(mr.r)}, "")
+			if rp.id != -1 {
+				cnid.rawNumber = strings.Join([]string{cnid.rawNumber, string(rp.r)}, "")
+			}
+			if rp.id != cnid.id || indx == len(rawParts)-1 {
+				log("rp: ", rp)
+				log("cnid:\t[", cnid.rawNumber, "]\tid:\t", cnid.id, "\tindx:\t", indx)
+				numbers[cnid.id] = append(numbers[cnid.id], parseInt(cnid.rawNumber))
+				cnid = numberId{id: -1}
+				continue
+			}
 		}
 	}
 	return numbers
