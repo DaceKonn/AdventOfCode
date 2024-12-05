@@ -1,0 +1,52 @@
+   evaluating update: 180
+    [12 22 63 65 38 28 94 55 49 64 24]
+     recursion depth: 0
+      Update: 180 violation of rule: 94|65
+       x:6|y:3
+      Update: 180 violation of rule: 64|65
+       x:9|y:4
+      Update: 180 violation of rule: 49|65
+       x:9|y:5
+      Update: 180 violation of rule: 38|65
+       x:7|y:6
+      Update: 180 violation of rule: 94|63
+       x:3|y:2
+      Update: 180 violation of rule: 65|63
+       x:7|y:3
+      Update: 180 violation of rule: 64|63
+       x:5|y:4
+      Update: 180 violation of rule: 49|63
+       x:6|y:5
+      Update: 180 violation of rule: 38|63
+       x:7|y:6
+      Update: 180 violation of rule: 94|22
+       x:2|y:1
+      Update: 180 violation of rule: 65|22
+       x:3|y:2
+      Update: 180 violation of rule: 64|22
+       x:4|y:3
+      Update: 180 violation of rule: 63|22
+       x:7|y:4
+      Update: 180 violation of rule: 49|22
+       x:6|y:5
+      Update: 180 violation of rule: 38|22
+       x:7|y:6
+      Update: 180 violation of rule: 94|12
+       x:1|y:0
+      Update: 180 violation of rule: 65|12
+       x:2|y:1
+      Update: 180 violation of rule: 64|12
+       x:3|y:2
+      Update: 180 violation of rule: 49|12
+       x:5|y:3
+      Update: 180 violation of rule: 38|12
+       x:6|y:4
+     recursion depth: 1
+       Update: 180 violation of rule: 64|65
+        x:2|y:1
+       Update: 180 violation of rule: 49|65
+        x:3|y:2
+       Update: 180 violation of rule: 38|65
+        x:4|y:3
+    [94 64 49 38 65 12 63 22 28 55 24]
+94 64 49 38 65 12 63 22 28 55 24
