@@ -26,12 +26,19 @@ func main() {
 	}
 
 	headerLog(0, "result")
+	headerLog(1, "part 1")
 	var result int = 0
 	for _, game := range games {
 		if !game.valid {
 			continue
 		}
 		result += game.id
+	}
+	log(result)
+	headerLog(1, "part 2")
+	result = 0
+	for _, game := range games {
+		result += game.getPower()
 	}
 	log(result)
 }

@@ -33,3 +33,19 @@ func newGame() game {
 		valid: true,
 	}
 }
+
+func (g game) getPower() int {
+	maxGreen, maxRed, maxBlue := 0, 0, 0
+	for _, singleSet := range g.sets {
+		if singleSet.green > maxGreen {
+			maxGreen = singleSet.green
+		}
+		if singleSet.blue > maxBlue {
+			maxBlue = singleSet.blue
+		}
+		if singleSet.red > maxRed {
+			maxRed = singleSet.red
+		}
+	}
+	return maxBlue * maxGreen * maxRed
+}
