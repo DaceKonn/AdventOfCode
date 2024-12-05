@@ -9,6 +9,10 @@ func log(a ...any) {
 	fmt.Println(a...)
 }
 
+func logLines(lines []string) {
+	fmt.Println(strings.Join(lines, "\n"))
+}
+
 func headerLog(depth int, message string) {
 	if depth < 0 {
 		panic("not expected depth < 0 in header log!")
