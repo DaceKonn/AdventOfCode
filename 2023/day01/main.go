@@ -5,22 +5,35 @@ import (
 	"strings"
 )
 
-const file string = "input_test_my.txt"
+const file string = "input_real.txt"
 const debugFileContent bool = true
 
 const depth int = 0
 
 var numbersMap map[string]string = map[string]string{
-	"zero":  "0",
-	"one":   "1",
-	"two":   "2",
-	"three": "3",
-	"four":  "4",
-	"five":  "5",
-	"six":   "6",
-	"seven": "7",
-	"eight": "8",
-	"nine":  "9",
+	"zero":  "zer",
+	"one":   "on",
+	"two":   "tw",
+	"three": "thr",
+	"four":  "four",
+	"five":  "fiv",
+	"six":   "six",
+	"seven": "sev",
+	"eight": "eigh",
+	"nine":  "ni",
+}
+
+var shortNumbersMap map[string]string = map[string]string{
+	"zer":  "0",
+	"on":   "1",
+	"tw":   "2",
+	"thr":  "3",
+	"four": "4",
+	"fiv":  "5",
+	"six":  "6",
+	"sev":  "7",
+	"eigh": "8",
+	"ni":   "9",
 }
 
 func main() {
@@ -52,7 +65,8 @@ func main() {
 func cleanupLines(lines []string, depth int) []string {
 	var result []string
 	for _, line := range lines {
-		newLine := cleanupLineRecursive(line)
+		depthLog(depth, fmt.Sprint("cleaning line:", line))
+		newLine := cleanupLineRecursive(line, depth+1)
 		result = append(result, newLine)
 		depthLog(depth, fmt.Sprint("old line:", line))
 		depthLog(depth, fmt.Sprint("new line:", newLine))
@@ -60,23 +74,26 @@ func cleanupLines(lines []string, depth int) []string {
 	return result
 }
 
-func cleanupLineRecursive(line string) string {
+func cleanupLineRecursive(line string, logDepth int) string {
 	var newLine string
 	lowestIndex := -1
 	selectedKey := ""
-	for key := range numbersMap {
-		firstIndex := strings.Index(newLine, key)
+	for key, shortKey := range numbersMap {
+		firstIndex := strings.Index(line, key)
+		depthLog(logDepth, fmt.Sprint("key:\t", key, "\tindex:\t", firstIndex))
 		if firstIndex == -1 || lowestIndex >= 0 && firstIndex > lowestIndex {
-			return line
+			continue
 		}
 		lowestIndex = firstIndex
-		selectedKey = key
+		selectedKey = shortKey
 	}
+	depthLog(logDepth, fmt.Sprint("selectedKey:\t", selectedKey, "\tlowestIndex:\t", lowestIndex))
 	if lowestIndex == -1 {
 		return line
 	}
-	newLine = strings.Replace(newLine, selectedKey, numbersMap[selectedKey], 1)
-	return newLine
+	newLine = strings.Replace(line, selectedKey, shortNumbersMap[selectedKey], 1)
+	return cleanupLineRecursive(newLine, logDepth+1)
+	// return newLine
 }
 
 func getNumbersFromLines(lines []string, depth int) []int {
