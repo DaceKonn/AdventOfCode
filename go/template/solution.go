@@ -1,6 +1,6 @@
 package main
 
 func runSolution(rawLines []string) {
-	// func runSolution(runeMatirx [][]runes, width, height int) {
+	// func runSolution(runeMatirx [][]rune, width, height int) {
 
 }
