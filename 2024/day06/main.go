@@ -9,7 +9,7 @@ import (
 )
 
 const logStdout bool = true
-const file string = "inputs/empty.txt"
+const file string = "inputs/example.txt"
 
 var logFile *os.File
 
