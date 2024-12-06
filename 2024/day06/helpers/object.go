@@ -1,5 +1,11 @@
 package helpers
 
+import (
+	"fmt"
+
+	"github.com/rs/zerolog/log"
+)
+
 const ObjectEmptySymbol rune = '?'
 
 var ObjectEmptyId Id = NewIntId(-1)
@@ -10,8 +16,13 @@ type Object interface {
 	GetCurrent() Point
 	GetSymbol() rune
 	GetId() Id
-	Copy() Object
+
 	SetSymbol(symbol rune)
+	SetOrigin(origin Point)
+	SetCurrent(current Point)
+	SetId(id Id)
+
+	Copy() Object
 }
 
 type DefaultObject struct {
@@ -19,6 +30,21 @@ type DefaultObject struct {
 	current Point
 	symbol  rune
 	id      Id
+}
+
+// SetCurrent implements Object.
+func (do *DefaultObject) SetCurrent(current Point) {
+	do.current = current
+}
+
+// SetId implements Object.
+func (do *DefaultObject) SetId(id Id) {
+	do.id = id
+}
+
+// SetOrigin implements Object.
+func (do *DefaultObject) SetOrigin(origin Point) {
+	do.origin = origin
 }
 
 func NewEmptyObject() Object {
@@ -66,4 +92,14 @@ func (do *DefaultObject) Copy() Object {
 		id:      do.GetId(),
 		symbol:  do.GetSymbol(),
 	}
+}
+
+func LogObjectDebug(o Object) {
+	log.Debug().
+		Type("type", o).
+		Str("rune", string(o.GetSymbol())).
+		Str("origin", fmt.Sprint(o.GetOrigin())).
+		Str("current", fmt.Sprint(o.GetCurrent())).
+		Str("id", fmt.Sprint(o.GetId())).
+		Msg("Object debug")
 }

@@ -10,12 +10,44 @@ const (
 	facingLeft
 )
 
+func facingToString(facing int) string {
+	switch facing {
+	case facingUnknown:
+		return "unknown"
+	case facingUp:
+		return "up"
+	case facingRight:
+		return "right"
+	case facingDown:
+		return "down"
+	case facingLeft:
+		return "left"
+	default:
+		return "undefined"
+	}
+}
+
 type guard struct {
 	o      helpers.Object
 	facing int
 }
 
-func newEmptyGuard() helpers.Object {
+// SetCurrent implements helpers.Object.
+func (g *guard) SetCurrent(current helpers.Point) {
+	g.o.SetCurrent(current)
+}
+
+// SetId implements helpers.Object.
+func (g *guard) SetId(id helpers.Id) {
+	g.o.SetId(id)
+}
+
+// SetOrigin implements helpers.Object.
+func (g *guard) SetOrigin(origin helpers.Point) {
+	g.o.SetOrigin(origin)
+}
+
+func newEmptyGuard() *guard {
 	return &guard{
 		o:      helpers.NewEmptyObject(),
 		facing: facingUnknown,
@@ -44,11 +76,50 @@ func (g *guard) GetFacing() int {
 
 func (g *guard) SetSymbol(symbol rune) {
 	g.o.SetSymbol(symbol)
+	g.facing = symbolToFacing(symbol)
 }
 
 func (g *guard) Copy() helpers.Object {
 	return &guard{
 		o:      g.o.Copy(),
 		facing: g.GetFacing(),
+	}
+}
+
+func (g *guard) SetFacing(facing int) {
+	g.facing = facing
+	g.o.SetSymbol(facingToSymbol(facing))
+}
+
+func symbolToFacing(symbol rune) int {
+	switch symbol {
+	case '^':
+		return facingUp
+	case '>':
+		return facingRight
+	case 'V', 'v':
+		return facingDown
+	case '<':
+		return facingLeft
+	default:
+		return facingUnknown
+
+	}
+}
+
+func facingToSymbol(facing int) rune {
+	switch facing {
+	case facingUnknown:
+		return '?'
+	case facingUp:
+		return '^'
+	case facingRight:
+		return '>'
+	case facingDown:
+		return 'v'
+	case facingLeft:
+		return '<'
+	default:
+		return '!'
 	}
 }

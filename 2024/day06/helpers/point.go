@@ -1,10 +1,14 @@
 package helpers
 
+import "fmt"
+
 type Point interface {
 	GetH() int
 	GetW() int
+
 	SetH(h int)
 	SetW(w int)
+
 	Copy() Point
 }
 
@@ -38,4 +42,8 @@ func (dp *DefaultPoint) Copy() Point {
 		h: dp.h,
 		w: dp.w,
 	}
+}
+
+func (dp *DefaultPoint) String() string {
+	return fmt.Sprint("h: ", dp.h, " | w: ", dp.w)
 }
