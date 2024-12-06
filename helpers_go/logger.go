@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func log(a ...any) {
+func logAny(a ...any) {
 	fmt.Println(a...)
 }
 
@@ -30,5 +30,5 @@ func debug(active bool, a ...any) {
 	if !active {
 		return
 	}
-	log(a...)
+	logAny(a...)
 }
