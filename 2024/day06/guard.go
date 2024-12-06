@@ -1,6 +1,9 @@
 package main
 
-import "github.com/DaceKonn/AdventOfCode/2024/day06/helpers"
+import (
+	"github.com/DaceKonn/AdventOfCode/2024/day06/helpers"
+	"github.com/rs/zerolog/log"
+)
 
 const (
 	facingUnknown = iota
@@ -30,6 +33,16 @@ func facingToString(facing int) string {
 type guard struct {
 	o      helpers.Object
 	facing int
+}
+
+// GetFlags implements helpers.Object.
+func (g *guard) GetFlags() map[string]bool {
+	return g.o.GetFlags()
+}
+
+// SetFlag implements helpers.Object.
+func (g *guard) SetFlag(key string, value bool) {
+	g.o.SetFlag(key, value)
 }
 
 // SetCurrent implements helpers.Object.
@@ -77,6 +90,10 @@ func (g *guard) GetFacing() int {
 func (g *guard) SetSymbol(symbol rune) {
 	g.o.SetSymbol(symbol)
 	g.facing = symbolToFacing(symbol)
+	log.Debug().
+		Str("facing", facingToString(g.facing)).
+		Str("id", g.o.GetId().String()).
+		Msg("Guard is now facing")
 }
 
 func (g *guard) Copy() helpers.Object {
@@ -89,6 +106,10 @@ func (g *guard) Copy() helpers.Object {
 func (g *guard) SetFacing(facing int) {
 	g.facing = facing
 	g.o.SetSymbol(facingToSymbol(facing))
+	log.Debug().
+		Str("facing", facingToString(facing)).
+		Str("id", g.o.GetId().String()).
+		Msg("Guard is now facing")
 }
 
 func symbolToFacing(symbol rune) int {
