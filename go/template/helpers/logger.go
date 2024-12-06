@@ -1,15 +1,15 @@
-package main
+package helpers
 
 import (
 	"fmt"
 	"strings"
 )
 
-func logAny(a ...any) {
+func LogAny(a ...any) {
 	fmt.Println(a...)
 }
 
-func headerLog(depth int, message string) {
+func HeaderLog(depth int, message string) {
 	if depth < 0 {
 		panic("not expected depth < 0 in header log!")
 	}
@@ -18,7 +18,7 @@ func headerLog(depth int, message string) {
 	fmt.Println("\n", hashes, message)
 }
 
-func depthLog(depth int, message string) {
+func DepthLog(depth int, message string) {
 	if depth < 0 {
 		panic("not expected depth < 0 in depth log!")
 	}
@@ -26,9 +26,9 @@ func depthLog(depth int, message string) {
 	fmt.Println(tabs, message)
 }
 
-func debug(active bool, a ...any) {
+func Debug(active bool, a ...any) {
 	if !active {
 		return
 	}
-	logAny(a...)
+	LogAny(a...)
 }

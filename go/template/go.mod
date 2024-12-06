@@ -1,4 +1,4 @@
-module github.com/DaceKonn/AdventOfCode/helpers_go
+module github.com/DaceKonn/AdventOfCode/202X/dayXX
 
 go 1.23.2
 

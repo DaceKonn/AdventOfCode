@@ -1,58 +1,58 @@
-package main
+package helpers
 
 import (
 	"fmt"
 	"strings"
 )
 
-type calculator interface {
-	calculate() int
-	print() string
+type Calculator interface {
+	Calculate() int
+	Print() string
 }
 
-type element struct {
+type Element struct {
 	Value int
 }
 
-func newElement(value int) element {
+func NewElement(value int) Element {
 	// fmt.Printf("\t\tcreating element: %d\n", value)
-	return element{Value: value}
+	return Element{Value: value}
 }
 
-func (e element) calculate() int {
+func (e Element) calculate() int {
 	return e.Value
 }
 
-func (e element) print() string {
+func (e Element) print() string {
 	return fmt.Sprintf("%d", e.Value)
 }
 
-type add struct {
-	elements []calculator
+type Add struct {
+	elements []Calculator
 }
 
-func newAdd() add {
-	// fmt.Println("\t\tcreating add")
-	return add{}
+func NewAdd() Add {
+	// fmt.Println("\t\tcreating Add")
+	return Add{}
 }
 
-func (a *add) addElement(el calculator) {
-	// fmt.Println("\t\t\t adding element")
+func (a *Add) AddElement(el Calculator) {
+	// fmt.Println("\t\t\t Adding element")
 	a.elements = append(a.elements, el)
 }
 
-func (a add) calculate() int {
+func (a Add) Calculate() int {
 	var base = 0
 	for _, el := range a.elements {
-		base += el.calculate()
+		base += el.Calculate()
 	}
 	return base
 }
 
-func (a add) print() string {
+func (a Add) Print() string {
 	var outSlice []string
 	for _, el := range a.elements {
-		outSlice = append(outSlice, el.print())
+		outSlice = append(outSlice, el.Print())
 	}
 	switch len(outSlice) {
 	case 0:
@@ -64,32 +64,32 @@ func (a add) print() string {
 	}
 }
 
-type multiply struct {
-	elements []calculator
+type Multiply struct {
+	elements []Calculator
 }
 
-func newMultiply() multiply {
+func NewMultiply() Multiply {
 	// fmt.Println("\t\tcreating multiply")
-	return multiply{}
+	return Multiply{}
 }
 
-func (m *multiply) addElement(el calculator) {
-	// fmt.Println("\t\t\t adding element")
+func (m *Multiply) AddElement(el Calculator) {
+	// fmt.Println("\t\t\t Adding element")
 	m.elements = append(m.elements, el)
 }
 
-func (m multiply) calculate() int {
+func (m Multiply) calculate() int {
 	var base int = 1
 	for _, el := range m.elements {
-		base *= el.calculate()
+		base *= el.Calculate()
 	}
 	return base
 }
 
-func (m multiply) print() string {
+func (m Multiply) print() string {
 	var outSlice []string
 	for _, el := range m.elements {
-		outSlice = append(outSlice, el.print())
+		outSlice = append(outSlice, el.Print())
 	}
 	switch len(outSlice) {
 	case 0:
