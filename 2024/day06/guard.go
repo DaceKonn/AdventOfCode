@@ -42,6 +42,10 @@ func (g *guard) GetFacing() int {
 	return g.facing
 }
 
+func (g *guard) SetSymbol(symbol rune) {
+	g.o.SetSymbol(symbol)
+}
+
 func (g *guard) Copy() helpers.Object {
 	return &guard{
 		o:      g.o.Copy(),

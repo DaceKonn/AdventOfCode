@@ -11,6 +11,7 @@ type Object interface {
 	GetSymbol() rune
 	GetId() Id
 	Copy() Object
+	SetSymbol(symbol rune)
 }
 
 type DefaultObject struct {
@@ -52,6 +53,10 @@ func (do *DefaultObject) GetSymbol() rune {
 
 func (do *DefaultObject) GetId() Id {
 	return do.id
+}
+
+func (do *DefaultObject) SetSymbol(symbol rune) {
+	do.symbol = symbol
 }
 
 func (do *DefaultObject) Copy() Object {
