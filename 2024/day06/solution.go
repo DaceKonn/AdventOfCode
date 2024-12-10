@@ -61,3 +61,22 @@ func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers
 	}
 	return obstacles, guards, floorTiles
 }
+
+func moveGuards(guards []*guard, width, height int) {
+	for _, guard := range guards {
+		switch guard.GetFacing() {
+		case facingUp:
+			h := guard.GetCurrent().GetH()
+			guard.GetCurrent().SetH(h - 1)
+		case facingRight:
+			w := guard.GetCurrent().GetW()
+			guard.GetCurrent().SetW(w + 1)
+		case facingDown:
+			h := guard.GetCurrent().GetH()
+			guard.GetCurrent().SetH(h + 1)
+		case facingLeft:
+			w := guard.GetCurrent().GetW()
+			guard.GetCurrent().SetW(w - 1)
+		}
+	}
+}

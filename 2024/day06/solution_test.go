@@ -59,6 +59,70 @@ func TestGuardShouldFaceLeft(t *testing.T) {
 	validateGuardFacing(guards, facingLeft, t)
 }
 
+func TestGuardsShouldMoveUp(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', '.', '.'},
+		{'.', '.', '.'},
+		{'^', '^', '^'},
+	}
+
+	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, width, height)
+	for _, guard := range guards {
+		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()-1 {
+			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
+func TestGuardsShouldMoveDown(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'v', 'V', 'v'},
+		{'.', '.', '.'},
+		{'.', '.', '.'},
+	}
+
+	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, width, height)
+	for _, guard := range guards {
+		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()+1 {
+			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
+func TestGuardsShouldMoveRight(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'>', '.', '.'},
+		{'>', '.', '.'},
+		{'>', '.', '.'},
+	}
+
+	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, width, height)
+	for _, guard := range guards {
+		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()+1 {
+			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
+func TestGuardsShouldMoveLeft(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', '.', '<'},
+		{'.', '.', '<'},
+		{'.', '.', '<'},
+	}
+
+	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, width, height)
+	for _, guard := range guards {
+		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()-1 {
+			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
 func validateGuardFacing(guards []*guard, facing int, t *testing.T) {
 	if len(guards) == 0 {
 		t.Error("Guard not detected")
