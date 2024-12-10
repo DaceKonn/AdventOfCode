@@ -26,9 +26,7 @@ func TestGuardShouldFaceUp(t *testing.T) {
 		{'.', '^', '.'},
 	}
 	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	if guards[0].facing != facingUp {
-		t.Errorf("Guard is not facing up, actual: %s", facingToString(guards[0].facing))
-	}
+	validateGuardFacing(guards, facingUp, t)
 }
 
 func TestGuardShouldFaceDown(t *testing.T) {
@@ -38,9 +36,7 @@ func TestGuardShouldFaceDown(t *testing.T) {
 		{'.', 'v', '.'},
 	}
 	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	if guards[0].facing != facingDown {
-		t.Errorf("Guard is not facing down, actual: %s", facingToString(guards[0].facing))
-	}
+	validateGuardFacing(guards, facingDown, t)
 }
 
 func TestGuardShouldFaceRight(t *testing.T) {
@@ -50,9 +46,7 @@ func TestGuardShouldFaceRight(t *testing.T) {
 		{'.', '>', '.'},
 	}
 	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	if guards[0].facing != facingRight {
-		t.Errorf("Guard is not facing right, actual: %s", facingToString(guards[0].facing))
-	}
+	validateGuardFacing(guards, facingRight, t)
 }
 
 func TestGuardShouldFaceLeft(t *testing.T) {
@@ -62,7 +56,16 @@ func TestGuardShouldFaceLeft(t *testing.T) {
 		{'.', '<', '.'},
 	}
 	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	if guards[0].facing != facingLeft {
-		t.Errorf("Guard is not facing left, actual: %s", facingToString(guards[0].facing))
+	validateGuardFacing(guards, facingLeft, t)
+}
+
+func validateGuardFacing(guards []*guard, facing int, t *testing.T) {
+	if len(guards) == 0 {
+		t.Error("Guard not detected")
+		return
+	}
+	if guards[0].facing != facing {
+		t.Errorf("Guard is not %s, actual: %s", facingToString(facing), facingToString(guards[0].facing))
+		return
 	}
 }

@@ -93,7 +93,7 @@ func (g *guard) SetSymbol(symbol rune) {
 	log.Debug().
 		Str("facing", facingToString(g.facing)).
 		Str("id", g.o.GetId().String()).
-		Msg("Guard is now facing")
+		Msg("Guard facing updated")
 }
 
 func (g *guard) Copy() helpers.Object {
@@ -109,7 +109,7 @@ func (g *guard) SetFacing(facing int) {
 	log.Debug().
 		Str("facing", facingToString(facing)).
 		Str("id", g.o.GetId().String()).
-		Msg("Guard is now facing")
+		Msg("Guard facing updated")
 }
 
 func symbolToFacing(symbol rune) int {
