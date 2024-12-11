@@ -62,7 +62,7 @@ func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers
 	return obstacles, guards, floorTiles
 }
 
-func moveGuards(guards []*guard, width, height int) {
+func moveGuards(guards []*guard, floorTiles []helpers.Object, width, height int) {
 	for _, guard := range guards {
 		if guard.HasExited() {
 			continue
@@ -81,8 +81,16 @@ func moveGuards(guards []*guard, width, height int) {
 			w := guard.GetCurrent().GetW()
 			guard.GetCurrent().SetW(w - 1)
 		}
-		if guard.GetCurrent().GetH() < 0 || guard.GetCurrent().GetW() < 0 || guard.GetCurrent().GetH() == height || guard.GetCurrent().GetW() == width {
+		guardExited := guard.GetCurrent().GetH() < 0 || guard.GetCurrent().GetW() < 0 || guard.GetCurrent().GetH() == height || guard.GetCurrent().GetW() == width
+		switch guardExited {
+		case true:
 			guard.SetExited(true)
+		case false:
+			for _, ft := range floorTiles {
+				if ft.GetOrigin().GetH() == guard.GetCurrent().GetH() && ft.GetOrigin().GetW() == guard.GetCurrent().GetW() {
+					ft.SetFlag("visited", true)
+				}
+			}
 		}
 	}
 }

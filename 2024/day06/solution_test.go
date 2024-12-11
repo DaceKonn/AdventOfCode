@@ -66,11 +66,16 @@ func TestGuardsShouldMoveUp(t *testing.T) {
 		{'^', '^', '^'},
 	}
 
-	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, width, height)
+	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()-1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+	for _, ft := range floorTiles {
+		if ft.GetOrigin().GetH() == 1 && !ft.GetFlags()["visited"] {
+			t.Errorf("Tile %s not marked as visited", ft.GetId())
 		}
 	}
 }
@@ -82,11 +87,16 @@ func TestGuardsShouldMoveDown(t *testing.T) {
 		{'.', '.', '.'},
 	}
 
-	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, width, height)
+	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()+1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+	for _, ft := range floorTiles {
+		if ft.GetOrigin().GetH() == 1 && !ft.GetFlags()["visited"] {
+			t.Errorf("Tile %s not marked as visited", ft.GetId())
 		}
 	}
 }
@@ -98,11 +108,16 @@ func TestGuardsShouldMoveRight(t *testing.T) {
 		{'>', '.', '.'},
 	}
 
-	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, width, height)
+	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()+1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+	for _, ft := range floorTiles {
+		if ft.GetOrigin().GetW() == 1 && !ft.GetFlags()["visited"] {
+			t.Errorf("Tile %s not marked as visited", ft.GetId())
 		}
 	}
 }
@@ -114,11 +129,16 @@ func TestGuardsShouldMoveLeft(t *testing.T) {
 		{'.', '.', '<'},
 	}
 
-	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, width, height)
+	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()-1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+	for _, ft := range floorTiles {
+		if ft.GetOrigin().GetW() == 1 && !ft.GetFlags()["visited"] {
+			t.Errorf("Tile %s not marked as visited", ft.GetId())
 		}
 	}
 }
@@ -130,8 +150,8 @@ func TestGuardsExitArea(t *testing.T) {
 		{'.', 'v', '.'},
 	}
 
-	_, guards, _ := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, width, height)
+	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if !guard.HasExited() {
 			t.Errorf("Guard %s didn't exited the area, origin %s, current %s, exited %v",
@@ -150,11 +170,11 @@ func TestGuardsMarkedAsExitShouldntUpdate(t *testing.T) {
 		{'.', 'v', '.'},
 	}
 
-	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
 	for _, guard := range guards {
 		guard.SetExited(true)
 	}
-	moveGuards(guards, width, height)
+	moveGuards(guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetOrigin().GetH() != guard.GetCurrent().GetH() || guard.GetOrigin().GetW() != guard.GetCurrent().GetW() {
 			t.Errorf("Guard %s wasn't supposed to move, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
