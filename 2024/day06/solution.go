@@ -36,6 +36,16 @@ func runSolution(runeMatrix [][]rune, width, height int) {
 		activeGuards = newActive
 		allowedIterations--
 	}
+
+	log.Info().Msg("Count visited tiles")
+	var visitedTiles int = 0
+	for _, ft := range floorTiles {
+		if !ft.GetFlags()["visited"] {
+			continue
+		}
+		visitedTiles++
+	}
+	log.Info().Int("visited-tiles", visitedTiles).Msg("Result")
 }
 
 func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers.Object, guards []*guard, floorTiles []helpers.Object) {
