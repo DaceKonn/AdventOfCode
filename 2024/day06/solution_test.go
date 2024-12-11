@@ -70,7 +70,7 @@ func TestGuardsShouldMoveUp(t *testing.T) {
 	moveGuards(guards, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()-1 {
-			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
 		}
 	}
 }
@@ -86,7 +86,7 @@ func TestGuardsShouldMoveDown(t *testing.T) {
 	moveGuards(guards, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()+1 {
-			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
 		}
 	}
 }
@@ -102,7 +102,7 @@ func TestGuardsShouldMoveRight(t *testing.T) {
 	moveGuards(guards, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()+1 {
-			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
 		}
 	}
 }
@@ -118,7 +118,46 @@ func TestGuardsShouldMoveLeft(t *testing.T) {
 	moveGuards(guards, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()-1 {
-			t.Errorf("Guards %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
+func TestGuardsExitArea(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', '^', '.'},
+		{'<', '.', '>'},
+		{'.', 'v', '.'},
+	}
+
+	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	moveGuards(guards, width, height)
+	for _, guard := range guards {
+		if !guard.HasExited() {
+			t.Errorf("Guard %s didn't exited the area, origin %s, current %s, exited %v",
+				guard.GetId(),
+				guard.GetOrigin(),
+				guard.GetCurrent(),
+				guard.HasExited())
+		}
+	}
+}
+
+func TestGuardsMarkedAsExitShouldntUpdate(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', '^', '.'},
+		{'<', '.', '>'},
+		{'.', 'v', '.'},
+	}
+
+	_, guards, _ := firstLevelScan(runeMatrix, width, height)
+	for _, guard := range guards {
+		guard.SetExited(true)
+	}
+	moveGuards(guards, width, height)
+	for _, guard := range guards {
+		if guard.GetOrigin().GetH() != guard.GetCurrent().GetH() || guard.GetOrigin().GetW() != guard.GetCurrent().GetW() {
+			t.Errorf("Guard %s wasn't supposed to move, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
 		}
 	}
 }

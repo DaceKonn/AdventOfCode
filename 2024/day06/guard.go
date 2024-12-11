@@ -31,8 +31,9 @@ func facingToString(facing int) string {
 }
 
 type guard struct {
-	o      helpers.Object
-	facing int
+	o         helpers.Object
+	facing    int
+	hasExited bool
 }
 
 // GetFlags implements helpers.Object.
@@ -62,8 +63,9 @@ func (g *guard) SetOrigin(origin helpers.Point) {
 
 func newEmptyGuard() *guard {
 	return &guard{
-		o:      helpers.NewEmptyObject(),
-		facing: facingUnknown,
+		o:         helpers.NewEmptyObject(),
+		facing:    facingUnknown,
+		hasExited: false,
 	}
 }
 
@@ -85,6 +87,14 @@ func (g *guard) GetSymbol() rune {
 
 func (g *guard) GetFacing() int {
 	return g.facing
+}
+
+func (g *guard) HasExited() bool {
+	return g.hasExited
+}
+
+func (g *guard) SetExited(v bool) {
+	g.hasExited = v
 }
 
 func (g *guard) SetSymbol(symbol rune) {
