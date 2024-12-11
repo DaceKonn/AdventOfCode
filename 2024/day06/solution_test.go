@@ -66,8 +66,8 @@ func TestGuardsShouldMoveUp(t *testing.T) {
 		{'^', '^', '^'},
 	}
 
-	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, floorTiles, width, height)
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()-1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -87,8 +87,8 @@ func TestGuardsShouldMoveDown(t *testing.T) {
 		{'.', '.', '.'},
 	}
 
-	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, floorTiles, width, height)
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()+1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -108,8 +108,8 @@ func TestGuardsShouldMoveRight(t *testing.T) {
 		{'>', '.', '.'},
 	}
 
-	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, floorTiles, width, height)
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()+1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -129,8 +129,8 @@ func TestGuardsShouldMoveLeft(t *testing.T) {
 		{'.', '.', '<'},
 	}
 
-	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, floorTiles, width, height)
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()-1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -150,8 +150,8 @@ func TestGuardsExitArea(t *testing.T) {
 		{'.', 'v', '.'},
 	}
 
-	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(guards, floorTiles, width, height)
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
 	for _, guard := range guards {
 		if !guard.HasExited() {
 			t.Errorf("Guard %s didn't exited the area, origin %s, current %s, exited %v",
@@ -170,12 +170,41 @@ func TestGuardsMarkedAsExitShouldntUpdate(t *testing.T) {
 		{'.', 'v', '.'},
 	}
 
-	_, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
 	for _, guard := range guards {
 		guard.SetExited(true)
 	}
-	moveGuards(guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
 	for _, guard := range guards {
+		if guard.GetOrigin().GetH() != guard.GetCurrent().GetH() || guard.GetOrigin().GetW() != guard.GetCurrent().GetW() {
+			t.Errorf("Guard %s wasn't supposed to move, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
+func TestGuardsShouldTurnWhenFacingObstacle(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', 'v', '.'},
+		{'>', '#', '<'},
+		{'.', '^', '.'},
+	}
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height)
+	for _, guard := range guards {
+		var newFacing int = facingUnknown
+		switch guard.GetId().String() {
+		case "0-1":
+			newFacing = facingLeft
+		case "1-0":
+			newFacing = facingDown
+		case "1-2":
+			newFacing = facingUp
+		case "2-1":
+			newFacing = facingRight
+		}
+		if guard.GetFacing() != newFacing {
+			t.Errorf("Guard %s is not facing new direction. Old facing %s, target facing %s", guard.GetId(), facingToString(guard.GetFacing()), facingToString(newFacing))
+		}
 		if guard.GetOrigin().GetH() != guard.GetCurrent().GetH() || guard.GetOrigin().GetW() != guard.GetCurrent().GetW() {
 			t.Errorf("Guard %s wasn't supposed to move, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
 		}

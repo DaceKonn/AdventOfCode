@@ -62,25 +62,49 @@ func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers
 	return obstacles, guards, floorTiles
 }
 
-func moveGuards(guards []*guard, floorTiles []helpers.Object, width, height int) {
+func moveGuards(obstacles []helpers.Object, guards []*guard, floorTiles []helpers.Object, width, height int) {
 	for _, guard := range guards {
 		if guard.HasExited() {
 			continue
 		}
+		newH := guard.GetCurrent().GetH()
+		newW := guard.GetCurrent().GetW()
 		switch guard.GetFacing() {
 		case facingUp:
-			h := guard.GetCurrent().GetH()
-			guard.GetCurrent().SetH(h - 1)
+			newH -= 1
 		case facingRight:
-			w := guard.GetCurrent().GetW()
-			guard.GetCurrent().SetW(w + 1)
+			newW += 1
 		case facingDown:
-			h := guard.GetCurrent().GetH()
-			guard.GetCurrent().SetH(h + 1)
+			newH += 1
 		case facingLeft:
-			w := guard.GetCurrent().GetW()
-			guard.GetCurrent().SetW(w - 1)
+			newW -= 1
 		}
+		var facingObstacle bool = false
+		for _, ob := range obstacles {
+			if ob.GetOrigin().GetH() == newH && ob.GetOrigin().GetW() == newW {
+				facingObstacle = true
+				break
+			}
+		}
+
+		if facingObstacle {
+			var newFacing int = facingUnknown
+			switch guard.GetFacing() {
+			case facingUp:
+				newFacing = facingRight
+			case facingRight:
+				newFacing = facingDown
+			case facingDown:
+				newFacing = facingLeft
+			case facingLeft:
+				newFacing = facingUp
+			}
+			guard.SetFacing(newFacing)
+			continue
+		}
+
+		guard.GetCurrent().SetH(newH)
+		guard.GetCurrent().SetW(newW)
 		guardExited := guard.GetCurrent().GetH() < 0 || guard.GetCurrent().GetW() < 0 || guard.GetCurrent().GetH() == height || guard.GetCurrent().GetW() == width
 		switch guardExited {
 		case true:
