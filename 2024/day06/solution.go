@@ -20,6 +20,22 @@ func runSolution(runeMatrix [][]rune, width, height int) {
 	for _, object := range guards {
 		helpers.LogObjectDebug(object)
 	}
+
+	log.Info().Msg("Move Guards")
+	allowedIterations := 10000
+	for activeGuards := len(guards); activeGuards > 0 && allowedIterations > 0; {
+		log.Debug().Int("active_guards", activeGuards).Int("remaning-iterations", allowedIterations).Msg("Moving active guards")
+		moveGuards(obstacles, guards, floorTiles, width, height)
+		var newActive int = 0
+		for _, guard := range guards {
+			if guard.HasExited() {
+				continue
+			}
+			newActive++
+		}
+		activeGuards = newActive
+		allowedIterations--
+	}
 }
 
 func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers.Object, guards []*guard, floorTiles []helpers.Object) {
@@ -108,6 +124,9 @@ func moveGuards(obstacles []helpers.Object, guards []*guard, floorTiles []helper
 		guardExited := guard.GetCurrent().GetH() < 0 || guard.GetCurrent().GetW() < 0 || guard.GetCurrent().GetH() == height || guard.GetCurrent().GetW() == width
 		switch guardExited {
 		case true:
+			log.Debug().
+				Str("id", guard.GetId().String()).
+				Msg("Guard left area")
 			guard.SetExited(true)
 		case false:
 			for _, ft := range floorTiles {
