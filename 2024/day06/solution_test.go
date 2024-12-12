@@ -67,7 +67,7 @@ func TestGuardsShouldMoveUp(t *testing.T) {
 	}
 
 	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()-1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -88,7 +88,7 @@ func TestGuardsShouldMoveDown(t *testing.T) {
 	}
 
 	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetH() != guard.GetOrigin().GetH()+1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -109,7 +109,7 @@ func TestGuardsShouldMoveRight(t *testing.T) {
 	}
 
 	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()+1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -130,7 +130,7 @@ func TestGuardsShouldMoveLeft(t *testing.T) {
 	}
 
 	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
 		if guard.GetCurrent().GetW() != guard.GetOrigin().GetW()-1 {
 			t.Errorf("Guard %s didn't moved in right direction, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -151,14 +151,14 @@ func TestGuardsExitArea(t *testing.T) {
 	}
 
 	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
-		if !guard.HasExited() {
+		if !guard.IsDeactivated() {
 			t.Errorf("Guard %s didn't exited the area, origin %s, current %s, exited %v",
 				guard.GetId(),
 				guard.GetOrigin(),
 				guard.GetCurrent(),
-				guard.HasExited())
+				guard.IsDeactivated())
 		}
 	}
 }
@@ -174,7 +174,7 @@ func TestGuardsMarkedAsExitShouldntUpdate(t *testing.T) {
 	for _, guard := range guards {
 		guard.SetExited(true)
 	}
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
 		if guard.GetOrigin().GetH() != guard.GetCurrent().GetH() || guard.GetOrigin().GetW() != guard.GetCurrent().GetW() {
 			t.Errorf("Guard %s wasn't supposed to move, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
@@ -189,7 +189,7 @@ func TestGuardsShouldTurnWhenFacingObstacle(t *testing.T) {
 		{'.', '^', '.'},
 	}
 	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
-	moveGuards(obstacles, guards, floorTiles, width, height)
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
 	for _, guard := range guards {
 		var newFacing int = facingUnknown
 		switch guard.GetId().String() {
@@ -207,6 +207,63 @@ func TestGuardsShouldTurnWhenFacingObstacle(t *testing.T) {
 		}
 		if guard.GetOrigin().GetH() != guard.GetCurrent().GetH() || guard.GetOrigin().GetW() != guard.GetCurrent().GetW() {
 			t.Errorf("Guard %s wasn't supposed to move, origin %s, current %s", guard.GetId(), guard.GetOrigin(), guard.GetCurrent())
+		}
+	}
+}
+
+func TestGuardShouldDeactivateAfterReturningToKnonwState(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', '.', '.'},
+		{'.', '.', '.'},
+		{'.', '^', '.'},
+	}
+
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	for _, ft := range floorTiles {
+		if ft.GetOrigin().GetH() != 1 && ft.GetOrigin().GetW() != 1 {
+			continue
+		}
+		ft.SetFlag("visited", true)
+		ft.SetFlag("Up", true)
+	}
+	moveGuards(obstacles, guards, floorTiles, width, height, true)
+	for _, guard := range guards {
+		if !guard.IsDeactivated() && !guard.GetFlags()["looped"] {
+			t.Errorf("Guard %s didn't deactivate and looped, origin %s, current %s, exited %v",
+				guard.GetId(),
+				guard.GetOrigin(),
+				guard.GetCurrent(),
+				guard.IsDeactivated())
+		}
+	}
+}
+
+func TestGuardShouldNotDeactivateAfterReturningToKnonwState(t *testing.T) {
+	var runeMatrix [][]rune = [][]rune{
+		{'.', '.', '.'},
+		{'.', '.', '.'},
+		{'.', '^', '.'},
+	}
+
+	obstacles, guards, floorTiles := firstLevelScan(runeMatrix, width, height)
+	for _, ft := range floorTiles {
+		if ft.GetOrigin().GetH() != 1 && ft.GetOrigin().GetW() != 1 {
+			continue
+		}
+		ft.SetFlag("visited", true)
+		ft.SetFlag("Up", false)
+		ft.SetFlag("Down", false)
+		ft.SetFlag("Left", false)
+		ft.SetFlag("Right", false)
+	}
+	moveGuards(obstacles, guards, floorTiles, width, height, false)
+	for _, guard := range guards {
+		if guard.IsDeactivated() || guard.GetFlags()["looped"] {
+			t.Errorf("Guard %s should not deactivate or set to looped, origin %s, current %s, exited %v",
+				guard.GetId(),
+				guard.GetOrigin(),
+				guard.GetCurrent(),
+				guard.IsDeactivated())
 		}
 	}
 }

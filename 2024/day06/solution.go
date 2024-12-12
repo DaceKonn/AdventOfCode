@@ -25,10 +25,10 @@ func runSolution(runeMatrix [][]rune, width, height int) {
 	allowedIterations := 10000
 	for activeGuards := len(guards); activeGuards > 0 && allowedIterations > 0; {
 		log.Debug().Int("active_guards", activeGuards).Int("remaning-iterations", allowedIterations).Msg("Moving active guards")
-		moveGuards(obstacles, guards, floorTiles, width, height)
+		moveGuards(obstacles, guards, floorTiles, width, height, false)
 		var newActive int = 0
 		for _, guard := range guards {
-			if guard.HasExited() {
+			if guard.IsDeactivated() {
 				continue
 			}
 			newActive++
@@ -88,9 +88,9 @@ func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers
 	return obstacles, guards, floorTiles
 }
 
-func moveGuards(obstacles []helpers.Object, guards []*guard, floorTiles []helpers.Object, width, height int) {
+func moveGuards(obstacles []helpers.Object, guards []*guard, floorTiles []helpers.Object, width, height int, loopBreak bool) {
 	for _, guard := range guards {
-		if guard.HasExited() {
+		if guard.IsDeactivated() {
 			continue
 		}
 		newH := guard.GetCurrent().GetH()
@@ -141,7 +141,34 @@ func moveGuards(obstacles []helpers.Object, guards []*guard, floorTiles []helper
 		case false:
 			for _, ft := range floorTiles {
 				if ft.GetOrigin().GetH() == guard.GetCurrent().GetH() && ft.GetOrigin().GetW() == guard.GetCurrent().GetW() {
+					if loopBreak && ft.GetFlags()["visited"] {
+						matchFacing := false
+						switch guard.GetFacing() {
+						case facingUp:
+							matchFacing = ft.GetFlags()["Up"] == true
+						case facingDown:
+							matchFacing = ft.GetFlags()["Down"] == true
+						case facingRight:
+							matchFacing = ft.GetFlags()["Right"] == true
+						case facingLeft:
+							matchFacing = ft.GetFlags()["Left"] == true
+						}
+						if matchFacing {
+							guard.SetExited(true)
+							guard.GetFlags()["looped"] = true
+						}
+					}
 					ft.SetFlag("visited", true)
+					switch guard.GetFacing() {
+					case facingUp:
+						ft.SetFlag("Up", true)
+					case facingDown:
+						ft.SetFlag("Down", true)
+					case facingRight:
+						ft.SetFlag("Right", true)
+					case facingLeft:
+						ft.SetFlag("Left", true)
+					}
 				}
 			}
 		}

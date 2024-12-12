@@ -89,7 +89,7 @@ func (g *guard) GetFacing() int {
 	return g.facing
 }
 
-func (g *guard) HasExited() bool {
+func (g *guard) IsDeactivated() bool {
 	return g.hasExited
 }
 
