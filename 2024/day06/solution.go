@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/DaceKonn/AdventOfCode/2024/day06/helpers"
+	// "github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -39,13 +40,104 @@ func runSolution(runeMatrix [][]rune, width, height int) {
 
 	log.Info().Msg("Count visited tiles")
 	var visitedTiles int = 0
+	var vt []helpers.Object
 	for _, ft := range floorTiles {
 		if !ft.GetFlags()["visited"] {
 			continue
 		}
+		vt = append(vt, ft)
 		visitedTiles++
 	}
 	log.Info().Int("visited-tiles", visitedTiles).Msg("Result")
+
+	log.Info().Msg("Try to find new obstacle")
+	var possibleObstacles int = 0
+	for indx, ft := range vt {
+		// if !ft.GetFlags()["visited"] {
+		// 	continue
+		// }
+		if indx%10 == 0 {
+			log.Info().Int("indx", indx).Msg("ft processing")
+		}
+		tmpFloorTiles := make([]helpers.Object, 0, 0)
+		tmpObstacles := make([]helpers.Object, 0, 0)
+		tmpGuards := make([]*guard, 0, 0)
+
+		// log.Info().Int("floor index", indx).Int("Possible obstacles", possibleObstacles).Msg("checking possible obstacle placement")
+
+		for _, nft := range floorTiles {
+			x := helpers.NewEmptyObject()
+			// x.SetFlag("visited", false)
+			x.SetFlag("Up", false)
+			x.SetFlag("Down", false)
+			x.SetFlag("Right", false)
+			x.SetFlag("Left", false)
+			x.SetOrigin(nft.GetOrigin())
+			x.SetCurrent(nft.GetOrigin())
+			tmpFloorTiles = append(tmpFloorTiles, x)
+		}
+
+		for _, nft := range obstacles {
+			x := nft.Copy()
+			tmpObstacles = append(tmpObstacles, x)
+		}
+
+		for _, nft := range guards {
+			x := newEmptyGuard()
+			x.SetOrigin(nft.GetOrigin().Copy())
+			x.SetCurrent(nft.GetOrigin().Copy())
+			x.SetFacing(facingUp)
+			tmpGuards = append(tmpGuards, x)
+		}
+
+		tmpFloorTiles = remove(tmpFloorTiles, indx)
+		tmpObstacle := helpers.NewEmptyObject()
+		tmpObstacle.SetId(helpers.NewStringId(ft.GetId().String()))
+		tmpObstacle.SetSymbol('#')
+		tmpObstacle.SetOrigin(ft.GetOrigin().Copy())
+		tmpObstacle.SetCurrent(ft.GetOrigin().Copy())
+		tmpObstacles = append(tmpObstacles, tmpObstacle)
+
+		// for _, object := range tmpObstacles {
+		// 	helpers.LogObjectInfo(object)
+		// }
+
+		allowedIterations = 1000
+		// if tmpObstacle.GetId().String() == "6-3" {
+		// 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		// } else {
+		// 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		// }
+		for activeGuards := len(tmpGuards); activeGuards > 0 && allowedIterations > 0; {
+			log.Debug().Int("active_guards", activeGuards).Int("remaning-iterations", allowedIterations).Msg("Moving active guards")
+			moveGuards(tmpObstacles, tmpGuards, tmpFloorTiles, width, height, true)
+			var newActive int = 0
+			for _, guard := range tmpGuards {
+				if guard.GetFlags()["looped"] {
+					possibleObstacles++
+				}
+				if guard.IsDeactivated() {
+					// log.Warn().Msg("NOT looped guard")
+					continue
+				}
+				newActive++
+			}
+			activeGuards = newActive
+			allowedIterations--
+		}
+
+		if allowedIterations <= 1 {
+			// log.Info().Msg("looped guard")
+			// helpers.LogObjectInfo(ft)
+			// possibleObstacles++
+		}
+	}
+
+	log.Info().Int("possible-obstacles", possibleObstacles).Msg("Result")
+}
+
+func remove(slice []helpers.Object, indx int) []helpers.Object {
+	return append(slice[:indx], slice[indx+1:]...)
 }
 
 func firstLevelScan(runeMatrix [][]rune, width, height int) (obstacles []helpers.Object, guards []*guard, floorTiles []helpers.Object) {

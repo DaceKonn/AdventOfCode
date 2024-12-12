@@ -16,11 +16,13 @@ type Object interface {
 	GetCurrent() Point
 	GetSymbol() rune
 	GetId() Id
+	GetFlags() map[string]bool
 
 	SetSymbol(symbol rune)
 	SetOrigin(origin Point)
 	SetCurrent(current Point)
 	SetId(id Id)
+	SetFlag(key string, value bool)
 
 	Copy() Object
 }
@@ -30,6 +32,17 @@ type DefaultObject struct {
 	current Point
 	symbol  rune
 	id      Id
+	flags   map[string]bool
+}
+
+// GetFlags implements Object.
+func (do *DefaultObject) GetFlags() map[string]bool {
+	return do.flags
+}
+
+// SetFlags implements Object.
+func (do *DefaultObject) SetFlag(key string, value bool) {
+	do.flags[key] = value
 }
 
 // SetCurrent implements Object.
@@ -53,6 +66,7 @@ func NewEmptyObject() Object {
 		current: ObjectDefaultPoint,
 		symbol:  ObjectEmptySymbol,
 		id:      ObjectEmptyId,
+		flags:   make(map[string]bool),
 	}
 }
 
@@ -62,6 +76,7 @@ func NewObject(origin, current Point, symbol rune, id Id) Object {
 		current: current,
 		symbol:  symbol,
 		id:      id,
+		flags:   make(map[string]bool),
 	}
 }
 
@@ -91,6 +106,7 @@ func (do *DefaultObject) Copy() Object {
 		current: do.GetCurrent().Copy(),
 		id:      do.GetId(),
 		symbol:  do.GetSymbol(),
+		flags:   make(map[string]bool),
 	}
 }
 
@@ -101,5 +117,17 @@ func LogObjectDebug(o Object) {
 		Str("origin", fmt.Sprint(o.GetOrigin())).
 		Str("current", fmt.Sprint(o.GetCurrent())).
 		Str("id", fmt.Sprint(o.GetId())).
+		Str("flags", fmt.Sprint(o.GetFlags())).
+		Msg("Object debug")
+}
+
+func LogObjectInfo(o Object) {
+	log.Info().
+		Type("type", o).
+		Str("rune", string(o.GetSymbol())).
+		Str("origin", fmt.Sprint(o.GetOrigin())).
+		Str("current", fmt.Sprint(o.GetCurrent())).
+		Str("id", fmt.Sprint(o.GetId())).
+		Str("flags", fmt.Sprint(o.GetFlags())).
 		Msg("Object debug")
 }

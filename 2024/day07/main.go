@@ -4,28 +4,26 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DaceKonn/AdventOfCode/2024/day06/helpers"
-	"github.com/rs/zerolog"
+	"github.com/DaceKonn/AdventOfCode/2024/day07/helpers"
 	"github.com/rs/zerolog/log"
 )
 
 const logStdout bool = true
-const file string = "inputs/real.txt"
+const file string = "inputs/example.txt"
 
 var logFile *os.File
 
 func main() {
-	fmt.Println("Advent of Code - 2024 - day 06")
+	fmt.Println("Advent of Code - 2024 - day 07")
 
 	logFile = helpers.SetupLogFile()
 	defer helpers.CloseLogFile(logFile)
 	helpers.ConfigureLogger(logFile, logStdout)
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	log.Debug().Str("file", file).Msg("Opening file")
 
-	// rawLines, err := helpers.ReadFile(file)
-	runeMatrix, width, height, err := helpers.ReadFileToMatrix(file)
+	rawLines, err := helpers.ReadFile(file)
+	// runeMatrix, width, height, err := helpers.ReadFileToMatrix(file)
 
 	if err != nil {
 		log.Fatal().Err(err).Str("file", file).Msg("Failed to read input file")
@@ -33,6 +31,6 @@ func main() {
 	}
 	log.Debug().Msg("Read file")
 
-	// runSolution(rawLines)
-	runSolution(runeMatrix, width, height)
+	runSolution(rawLines)
+	// runSolution(runeMatrix,width,height)
 }
