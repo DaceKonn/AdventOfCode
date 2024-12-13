@@ -23,8 +23,6 @@ type Object interface {
 	SetCurrent(current Point)
 	SetId(id Id)
 	SetFlag(key string, value bool)
-
-	Copy() Object
 }
 
 type DefaultObject struct {
@@ -98,16 +96,6 @@ func (do *DefaultObject) GetId() Id {
 
 func (do *DefaultObject) SetSymbol(symbol rune) {
 	do.symbol = symbol
-}
-
-func (do *DefaultObject) Copy() Object {
-	return &DefaultObject{
-		origin:  do.GetOrigin().Copy(),
-		current: do.GetCurrent().Copy(),
-		id:      do.GetId(),
-		symbol:  do.GetSymbol(),
-		flags:   make(map[string]bool),
-	}
 }
 
 func LogObjectDebug(o Object) {
