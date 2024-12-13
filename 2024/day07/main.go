@@ -5,10 +5,12 @@ import (
 	"os"
 
 	"github.com/DaceKonn/AdventOfCode/2024/day07/helpers"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 const logStdout bool = true
+const debug bool = false
 const file string = "inputs/example.txt"
 
 var logFile *os.File
@@ -22,6 +24,9 @@ func main() {
 
 	log.Debug().Str("file", file).Msg("Opening file")
 
+	if !debug {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
 	rawLines, err := helpers.ReadFile(file)
 	// runeMatrix, width, height, err := helpers.ReadFileToMatrix(file)
 

@@ -11,6 +11,7 @@ import (
 func runSolution(rawLines []string) {
 	// func runSolution(runeMatrix [][]rune, width, height int) {
 	equations := make([]equation, 0, len(rawLines))
+	permutationMap := make(map[int][][]int)
 	for _, rLine := range rawLines {
 		fisrtLevelSplit := strings.Split(rLine, ": ")
 		resultString := fisrtLevelSplit[0]
@@ -21,23 +22,34 @@ func runSolution(rawLines []string) {
 			Msg("Reading line")
 
 		el := make([]int, 0, len(elementsStrings))
+		eqEl := make([]helpers.Element, 0, len(elementsStrings))
 		for _, els := range elementsStrings {
-			el = append(el, helpers.ParseInt(els))
+			intV := helpers.ParseInt(els)
+			el = append(el, intV)
+			eqEl = append(eqEl, helpers.NewElement(intV))
 		}
-		equations = append(equations, equation{resultString, elementsStrings, helpers.ParseInt(resultString), el})
+		equations = append(equations, equation{resultString, elementsStrings, helpers.ParseInt(resultString), el, eqEl})
+		if _, exists := permutationMap[len(elementsStrings)-1]; !exists {
+			permutationMap[len(elementsStrings)-1] = generatePermutations(len(elementsStrings) - 1)
+		}
 	}
 
-	for _, equation := range equations {
+	var result int = 0
+	for indx, equation := range equations {
+		log.Info().Int("nr", indx).Int("len", len(equations)).Msg("Calculating")
 		log.Debug().
 			Str("equation", fmt.Sprint(equation.resultString, " = ", equation.elementsStrings)).
 			Msg("Attempting calculation")
-
-		eqEls := make([]helpers.Element, 0, len(equation.elements))
-		for _, elInt := range equation.elements {
-			eqEl := helpers.NewElement(elInt)
-			eqEls = append(eqEls, eqEl)
+		for _, permutation := range permutationMap[len(equation.eqElements)-1] {
+			calResult := calculate(equation.eqElements, equation.result, permutation)
+			if calResult == equation.result {
+				result += calResult
+				break
+			}
 		}
 	}
+
+	log.Info().Int("result", result).Msg("Result")
 }
 
 type equation struct {
@@ -45,6 +57,7 @@ type equation struct {
 	elementsStrings []string
 	result          int
 	elements        []int
+	eqElements      []helpers.Element
 }
 
 const (
@@ -52,11 +65,37 @@ const (
 	multiply
 )
 
+// generatePermutations generates all permutations of a slice of 0s and 1s of a given length
+func generatePermutations(length int) [][]int {
+	var result [][]int
+	var permute func([]int, int)
+
+	permute = func(current []int, pos int) {
+		if pos == length {
+			// Make a copy of the current slice and add it to the result
+			temp := make([]int, length)
+			copy(temp, current)
+			result = append(result, temp)
+			return
+		}
+		// Set the current position to 0 and recurse
+		current[pos] = add
+		permute(current, pos+1)
+		// Set the current position to 1 and recurse
+		current[pos] = multiply
+		permute(current, pos+1)
+	}
+
+	// Initialize the permutation with the given length
+	permute(make([]int, length), 0)
+	return result
+}
+
 func calculate(equationElements []helpers.Element, result int, operands []int) int {
 	if len(operands) == 0 {
 		log.Debug().Msg("Initiating operands")
 		for range len(equationElements) - 1 {
-			operands = append(operands, add)
+			operands = append(operands, multiply)
 		}
 	}
 	log.Debug().Ints("operands", operands).Msg("Will use operands")
@@ -64,7 +103,6 @@ func calculate(equationElements []helpers.Element, result int, operands []int) i
 	log.Debug().Msg("calculating")
 
 	var eq helpers.Calculator = equationElements[0]
-	allMultiply := true
 	for indx, oper := range operands {
 		switch oper {
 		case add:
@@ -72,7 +110,6 @@ func calculate(equationElements []helpers.Element, result int, operands []int) i
 			addEq.AddElement(eq)
 			addEq.AddElement(equationElements[indx+1])
 			eq = addEq
-			allMultiply = false
 		case multiply:
 			multiplyEq := helpers.NewMultiply()
 			multiplyEq.AddElement(eq)
@@ -82,25 +119,9 @@ func calculate(equationElements []helpers.Element, result int, operands []int) i
 	}
 
 	log.Debug().Str("equation", eq.Print()).Msg("Build equation")
-	if eq.Calculate() == result {
+	eqResult := eq.Calculate()
+	if eqResult == result {
 		return result
-	}
-
-	if allMultiply {
-		return 0
-	}
-
-	for operIndx, oper := range operands {
-		if oper == multiply {
-			continue
-		}
-		newOperands := append(operands[:operIndx], multiply)
-		newOperands = append(newOperands, operands[operIndx+1:]...)
-		recu := calculate(equationElements, result, newOperands)
-		if recu == 0 {
-			return 0
-		}
-		return recu
 	}
 
 	return 0
