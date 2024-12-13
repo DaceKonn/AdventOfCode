@@ -12,7 +12,7 @@ import (
 func runSolution(runeMatrix [][]rune, width, height int, partTwo bool) {
 	antenaGroups := getAntenaGroups(runeMatrix, width, height)
 	antenaPairs := getAntenaPairs(antenaGroups)
-	rawNodes := generateAntinodes(antenaPairs, height, width)
+	rawNodes := generateAntinodes(antenaPairs, height, width, partTwo)
 	result := getUnique(rawNodes)
 	log.Info().Int("result", len(result)).Msg("Result")
 
@@ -78,7 +78,7 @@ func getAntenaPairs(antenas map[rune][]antena) [][]antena {
 	return result
 }
 
-func generateAntinodes(pairs [][]antena, height, width int) []antinode {
+func generateAntinodes(pairs [][]antena, height, width int, partTwo bool) []antinode {
 	result := make([]antinode, 0, 0)
 	if len(pairs) == 0 {
 		panic("not enough pairs")
@@ -94,7 +94,7 @@ func generateAntinodes(pairs [][]antena, height, width int) []antinode {
 		dH := int(math.Abs(float64(x.point.GetH() - y.point.GetH())))
 		dW := int(math.Abs(float64(x.point.GetW() - y.point.GetW())))
 
-		tmp := getValidAntinodes(x.point.GetH(), x.point.GetW(), y.point.GetH(), y.point.GetW(), dH, dW, height, width, x, y)
+		tmp := getValidAntinodes(x.point.GetH(), x.point.GetW(), y.point.GetH(), y.point.GetW(), dH, dW, height, width, x, y, partTwo)
 		if len(tmp) > 0 {
 			result = append(result, tmp...)
 		}
@@ -103,27 +103,59 @@ func generateAntinodes(pairs [][]antena, height, width int) []antinode {
 	return result
 }
 
-func getValidAntinodes(xH, xW, yH, yW, dH, dW, height, width int, x, y antena) []antinode {
+func getValidAntinodes(xH, xW, yH, yW, dH, dW, height, width int, x, y antena, partTwo bool) []antinode {
 	result := make([]antinode, 0, 0)
 	tmp := make([]antinode, 0, 0)
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH-dH, xW-dW)})
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH+dH, xW+dW)})
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH-dH, yW-dW)})
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH+dH, yW+dW)})
 
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH-dH, xW+dW)})
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH+dH, xW-dW)})
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH-dH, yW+dW)})
-	tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH+dH, yW-dW)})
-	for _, node := range tmp {
-		if node.point.GetH() == xH || node.point.GetH() == yH ||
-			node.point.GetW() == xW || node.point.GetW() == yW ||
-			node.point.GetH() < 0 || node.point.GetW() < 0 ||
-			node.point.GetH() >= height || node.point.GetW() >= width {
-			continue
+	if !partTwo {
+
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH-dH, xW-dW)})
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH+dH, xW+dW)})
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH-dH, yW-dW)})
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH+dH, yW+dW)})
+
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH-dH, xW+dW)})
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(xH+dH, xW-dW)})
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH-dH, yW+dW)})
+		tmp = append(tmp, antinode{[]antena{x, y}, helpers.NewDefaultPoint(yH+dH, yW-dW)})
+
+		for _, node := range tmp {
+			if node.point.GetH() == xH || node.point.GetH() == yH ||
+				node.point.GetW() == xW || node.point.GetW() == yW ||
+				node.point.GetH() < 0 || node.point.GetW() < 0 ||
+				node.point.GetH() >= height || node.point.GetW() >= width {
+				continue
+			}
+			result = append(result, node)
 		}
-		result = append(result, node)
+	} else {
+		deltaA := helpers.NewDefaultPoint(xH-yH, xW-yW)
+		deltaB := helpers.NewDefaultPoint(0-(xH-yH), 0-(xW-yW))
+		log.Debug().Str("deltaA", deltaA.String()).Str("deltaB", deltaB.String()).Msg("Deltas")
+
+		var recur func(delta, point helpers.DefaultPoint)
+
+		recur = func(delta, point helpers.DefaultPoint) {
+			log.Debug().Msg("Recursion")
+			newH := point.GetH() + delta.GetH()
+			newW := point.GetW() + delta.GetW()
+			if newH < 0 || newW < 0 ||
+				newH >= height || newW >= height {
+				return
+			}
+			newPoint := helpers.NewDefaultPoint(newH, newW)
+			tmp = append(tmp, antinode{[]antena{x, y}, newPoint})
+			recur(delta, newPoint)
+		}
+
+		recur(deltaA, x.point)
+		recur(deltaB, y.point)
+
+		result = append(result, tmp...)
+		result = append(result, antinode{[]antena{x, y}, x.point})
+		result = append(result, antinode{[]antena{x, y}, y.point})
 	}
+
 	return result
 }
 

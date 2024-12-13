@@ -129,7 +129,7 @@ func TestShouldGenerateAntinodes(t *testing.T) {
 		helpers.NewDefaultPoint(7, 6): false,
 	}
 
-	output := generateAntinodes(testData, 10, 10)
+	output := generateAntinodes(testData, 10, 10, false)
 
 	for _, o := range output {
 		for k := range expected {
@@ -161,7 +161,7 @@ func TestShouldGenerateAntinodesVariantB(t *testing.T) {
 		helpers.NewDefaultPoint(7, 6): false,
 	}
 
-	output := generateAntinodes(testData, 10, 10)
+	output := generateAntinodes(testData, 10, 10, false)
 
 	for _, o := range output {
 		for k := range expected {
@@ -189,7 +189,7 @@ func TestShouldNotGenerateAntinodesOutOfBounds(t *testing.T) {
 		{helpers.NewDefaultPoint(1, 1), tr},
 	}
 
-	output := generateAntinodes(testData, 2, 2)
+	output := generateAntinodes(testData, 2, 2, false)
 	if len(output) > 0 {
 		t.Error("Expected 0 nodes")
 	}
@@ -204,5 +204,41 @@ func TestShouldGetUnique(t *testing.T) {
 	output := getUnique(testData)
 	if len(output) != 1 {
 		t.Error("Unique returned wrong amount of nodes ", output)
+	}
+}
+
+func TestShouldGenerateAntinodesPartTwo(t *testing.T) {
+	testData := make([][]antena, 1, 1)
+	tr := 'A'
+	testData[0] = []antena{
+		{helpers.NewDefaultPoint(0, 0), tr},
+		{helpers.NewDefaultPoint(2, 1), tr},
+	}
+	expected := map[helpers.DefaultPoint]bool{
+		helpers.NewDefaultPoint(4, 2): false,
+		helpers.NewDefaultPoint(6, 3): false,
+		helpers.NewDefaultPoint(8, 4): false,
+		helpers.NewDefaultPoint(0, 0): false,
+		helpers.NewDefaultPoint(2, 1): false,
+	}
+
+	output := generateAntinodes(testData, 10, 10, true)
+	t.Log(output)
+
+	for _, o := range output {
+		for k := range expected {
+			if o.point.GetH() != k.GetH() && o.point.GetW() != k.GetW() {
+				continue
+			}
+			expected[k] = true
+		}
+	}
+
+	for k, v := range expected {
+		if v {
+			t.Log("Antinode\t", k, "\t\tfound")
+		} else {
+			t.Error("Antinode\t", k, "\t\tnot found")
+		}
 	}
 }

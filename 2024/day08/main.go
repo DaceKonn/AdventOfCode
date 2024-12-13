@@ -11,8 +11,8 @@ import (
 
 const logStdout bool = true
 const debug bool = true
-const partTwo bool = false
-const file string = "inputs/example.txt"
+const partTwo bool = true
+const file string = "inputs/real.txt"
 
 var logFile *os.File
 
