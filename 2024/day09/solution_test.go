@@ -74,3 +74,81 @@ func TestShouldSortMemory(t *testing.T) {
 		t.Error("Wrong id at desired place")
 	}
 }
+
+func TestShouldSortMemoryWithFragmentationSafety(t *testing.T) {
+	testData := []cell{
+		{taken, 0, 0},
+		{free, -1, 1},
+		{taken, 1, 2},
+		{free, -1, 3},
+		{free, -1, 4},
+		{taken, 2, 5},
+		{taken, 3, 6},
+		{taken, 3, 7},
+	}
+	output := sortWithoutFragmenting(testData)
+	t.Log(output)
+	if output[0].id != 0 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[1].id != 2 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[2].id != 1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[3].id != 3 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[4].id != 3 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[5].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[6].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[7].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+}
+
+func TestShouldSortMemoryWithFragmentationSafetyVariantB(t *testing.T) {
+	testData := []cell{
+		{taken, 0, 0},
+		{free, -1, 1},
+		{free, -1, 2},
+		{free, -1, 3},
+		{free, -1, 4},
+		{taken, 1, 5},
+		{taken, 2, 6},
+		{taken, 2, 7},
+	}
+	output := sortWithoutFragmenting(testData)
+	t.Log(output)
+	if output[0].id != 0 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[1].id != 2 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[2].id != 2 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[3].id != 1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[4].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[5].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[6].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+	if output[7].id != -1 {
+		t.Error("Wrong id at desired place")
+	}
+}
