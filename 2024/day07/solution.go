@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func runSolution(rawLines []string) {
+func runSolution(rawLines []string, partTwo bool) {
 	// func runSolution(runeMatrix [][]rune, width, height int) {
 	equations := make([]equation, 0, len(rawLines))
 	permutationMap := make(map[int][][]int)
@@ -30,7 +30,7 @@ func runSolution(rawLines []string) {
 		}
 		equations = append(equations, equation{resultString, elementsStrings, helpers.ParseInt(resultString), el, eqEl})
 		if _, exists := permutationMap[len(elementsStrings)-1]; !exists {
-			permutationMap[len(elementsStrings)-1] = generatePermutations(len(elementsStrings) - 1)
+			permutationMap[len(elementsStrings)-1] = generatePermutations(len(elementsStrings)-1, partTwo)
 		}
 	}
 
@@ -63,10 +63,11 @@ type equation struct {
 const (
 	add = iota
 	multiply
+	concentrate
 )
 
 // generatePermutations generates all permutations of a slice of 0s and 1s of a given length
-func generatePermutations(length int) [][]int {
+func generatePermutations(length int, partTwo bool) [][]int {
 	var result [][]int
 	var permute func([]int, int)
 
@@ -84,6 +85,11 @@ func generatePermutations(length int) [][]int {
 		// Set the current position to 1 and recurse
 		current[pos] = multiply
 		permute(current, pos+1)
+
+		if partTwo {
+			current[pos] = concentrate
+			permute(current, pos+1)
+		}
 	}
 
 	// Initialize the permutation with the given length
@@ -115,7 +121,13 @@ func calculate(equationElements []helpers.Element, result int, operands []int) i
 			multiplyEq.AddElement(eq)
 			multiplyEq.AddElement(equationElements[indx+1])
 			eq = multiplyEq
+		case concentrate:
+			concentrateEq := helpers.NewConcentrate()
+			concentrateEq.AddElement(eq)
+			concentrateEq.AddElement(equationElements[indx+1])
+			eq = concentrateEq
 		}
+
 	}
 
 	log.Debug().Str("equation", eq.Print()).Msg("Build equation")

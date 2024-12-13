@@ -11,7 +11,8 @@ import (
 
 const logStdout bool = true
 const debug bool = false
-const file string = "inputs/example.txt"
+const partTwo bool = true
+const file string = "inputs/real.txt"
 
 var logFile *os.File
 
@@ -36,6 +37,6 @@ func main() {
 	}
 	log.Debug().Msg("Read file")
 
-	runSolution(rawLines)
+	runSolution(rawLines, partTwo)
 	// runSolution(runeMatrix,width,height)
 }

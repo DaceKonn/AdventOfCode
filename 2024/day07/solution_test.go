@@ -62,7 +62,7 @@ func DisabledTestComplex(t *testing.T) {
 }
 
 func TestShouldReturnProperAmountOfPossiblePermutations(t *testing.T) {
-	x := generatePermutations(4)
+	x := generatePermutations(4, false)
 	if len(x) != 16 {
 		t.Error("Expected 16, got ", len(x))
 	}
@@ -76,7 +76,7 @@ func TestShouldReturnProperPermutations(t *testing.T) {
 	testSamples["11"] = false
 
 	// x := buildPossibleOperands(2)
-	x := generatePermutations(2)
+	x := generatePermutations(2, false)
 	if len(x) != 4 {
 		t.Error("Expected 4, got ", len(x))
 		t.FailNow()

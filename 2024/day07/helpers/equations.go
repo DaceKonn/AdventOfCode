@@ -100,3 +100,40 @@ func (m Multiply) Print() string {
 		return strings.Join(outSlice, " * ")
 	}
 }
+
+type Concentrate struct {
+	elements []Calculator
+}
+
+func NewConcentrate() Concentrate {
+	// fmt.Println("\t\tcreating Concentrate")
+	return Concentrate{}
+}
+
+func (a *Concentrate) AddElement(el Calculator) {
+	// fmt.Println("\t\t\t Concentrateing element")
+	a.elements = append(a.elements, el)
+}
+
+func (a Concentrate) Calculate() int {
+	var tmp string = ""
+	for _, el := range a.elements {
+		tmp = strings.Join([]string{tmp, fmt.Sprint(el.Calculate())}, "")
+	}
+	return ParseInt(tmp)
+}
+
+func (a Concentrate) Print() string {
+	var outSlice []string
+	for _, el := range a.elements {
+		outSlice = append(outSlice, el.Print())
+	}
+	switch len(outSlice) {
+	case 0:
+		return "emptyConcentrate"
+	case 1:
+		return fmt.Sprintf("singleConcentrate(%s)", outSlice[0])
+	default:
+		return strings.Join(outSlice, " || ")
+	}
+}
