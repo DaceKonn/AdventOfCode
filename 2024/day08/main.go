@@ -28,8 +28,8 @@ func main() {
 	if !debug {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
-	rawLines, err := helpers.ReadFile(file)
-	// runeMatrix, width, height, err := helpers.ReadFileToMatrix(file)
+	// rawLines, err := helpers.ReadFile(file)
+	runeMatrix, width, height, err := helpers.ReadFileToMatrix(file)
 
 	if err != nil {
 		log.Fatal().Err(err).Str("file", file).Msg("Failed to read input file")
@@ -37,6 +37,6 @@ func main() {
 	}
 	log.Debug().Msg("Read file")
 
-	runSolution(rawLines, partTwo)
-	// runSolution(runeMatrix,width,height,partTwo)
+	// runSolution(rawLines, partTwo)
+	runSolution(runeMatrix, width, height, partTwo)
 }

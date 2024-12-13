@@ -17,8 +17,8 @@ type DefaultPoint struct {
 	w int
 }
 
-func NewDefaultPoint(h, w int) Point {
-	return &DefaultPoint{h: h, w: w}
+func NewDefaultPoint(h, w int) DefaultPoint {
+	return DefaultPoint{h: h, w: w}
 }
 
 func (dp *DefaultPoint) GetH() int {
