@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DaceKonn/AdventOfCode/202X/dayXX/helpers"
+	"github.com/DaceKonn/AdventOfCode/2024/day08/helpers"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -17,7 +17,7 @@ const file string = "inputs/example.txt"
 var logFile *os.File
 
 func main() {
-	fmt.Println("Advent of Code - 202X - day XX")
+	fmt.Println("Advent of Code - 2024 - day 08")
 
 	logFile = helpers.SetupLogFile()
 	defer helpers.CloseLogFile(logFile)

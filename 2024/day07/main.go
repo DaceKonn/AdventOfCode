@@ -38,5 +38,5 @@ func main() {
 	log.Debug().Msg("Read file")
 
 	runSolution(rawLines, partTwo)
-	// runSolution(runeMatrix,width,height)
+	// runSolution(runeMatrix,width,height,partTwo)
 }
