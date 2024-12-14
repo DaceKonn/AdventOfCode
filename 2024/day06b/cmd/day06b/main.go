@@ -13,7 +13,7 @@ import (
 const logStdout bool = true
 const debug bool = true
 const partTwo bool = false
-const file string = "../../inputs/empty.txt"
+const file string = "../../inputs/real.txt"
 
 var logFile *os.File
 
