@@ -85,3 +85,13 @@ func countVisits(matrix [][]map[int]bool, width, height int) int {
 	}
 	return result
 }
+
+func anyVisit(cell map[int]bool) bool {
+	return cell[facingUp] || cell[facingRight] || cell[facingDown] || cell[facingLeft]
+}
+
+func copyObstacles(destination [][]bool, source [][]bool) {
+	for i := range source {
+		copy(destination[i], source[i])
+	}
+}

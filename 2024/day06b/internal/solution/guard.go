@@ -13,9 +13,10 @@ type guard struct {
 	w      int
 }
 
-func (g guard) walkGuard(obstacleMatrix [][]bool, pathMatrix [][]map[int]bool, width, height int) [][]map[int]bool {
+func (g guard) walkGuard(obstacleMatrix [][]bool, pathMatrix [][]map[int]bool, width, height int) ([][]map[int]bool, bool) {
 
-	var walk func(newH, newW int)
+	looped := false
+	var walk func(newH, neawW int)
 	walk = func(newH, newW int) {
 		if newH < 0 || newW < 0 ||
 			newH >= height || newW >= width {
@@ -24,10 +25,14 @@ func (g guard) walkGuard(obstacleMatrix [][]bool, pathMatrix [][]map[int]bool, w
 		if obstacleMatrix[newH][newW] {
 			g.turn()
 		} else {
-			pathMatrix[newH][newW][g.facing] = true
 			g.h = newH
 			g.w = newW
 		}
+		if pathMatrix[g.h][g.w][g.facing] {
+			looped = true
+			return
+		}
+		pathMatrix[g.h][g.w][g.facing] = true
 		switch g.facing {
 		case facingUp:
 			walk(g.h-1, g.w)
@@ -42,7 +47,7 @@ func (g guard) walkGuard(obstacleMatrix [][]bool, pathMatrix [][]map[int]bool, w
 
 	walk(g.h-1, g.w)
 
-	return pathMatrix
+	return pathMatrix, looped
 }
 
 func (g *guard) turn() {
