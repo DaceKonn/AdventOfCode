@@ -9,7 +9,7 @@ func RunSolution(runeMatrix [][]rune, width, height int, partTwo bool) {
 	printStartingPoints(startLocations)
 	score := 0
 	for _, st := range startLocations {
-		v := travel(heightMatrix, st.GetH(), st.GetW(), height, width)
+		v := travel(heightMatrix, st.GetH(), st.GetW(), height, width, partTwo)
 		score += v
 	}
 

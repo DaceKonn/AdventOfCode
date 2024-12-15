@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func travel(heightMatrix [][]int, startH, startW, height, width int) int {
+func travel(heightMatrix [][]int, startH, startW, height, width int, partTwo bool) int {
 	score := 0
 	visited := make([][]bool, height, height)
 	for h := range height {
@@ -20,7 +20,7 @@ func travel(heightMatrix [][]int, startH, startW, height, width int) int {
 			log.Debug().Msg("walking out of bounds")
 			return
 		}
-		if visited[h][w] {
+		if !partTwo && visited[h][w] {
 			log.Debug().Msg("already visited")
 			return
 		}
