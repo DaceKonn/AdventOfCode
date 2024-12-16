@@ -2,6 +2,7 @@ package solution
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/DaceKonn/AdventOfCode/2024/day16/helpers"
 	"github.com/rs/zerolog/log"
@@ -14,12 +15,17 @@ const (
 	facingLeft
 )
 
-func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, height, width int) int {
+func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, height, width int) (score int, seatNo int) {
 
 	visibleNodes := make(map[string]helpers.DefaultPoint)
+	seats := make([][]bool, height, height)
+	for h := range height {
+		seats[h] = make([]bool, width, width)
+	}
 
 	// block := 99999999
-	score := 0
+	score = 0
+	seatNo = 0
 	var recu func(currentNode *node, currentFacing int)
 	recu = func(currentNode *node, currentFacing int) {
 		// if block == 0 {
@@ -55,6 +61,7 @@ func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, 
 		}
 		newNode := &nodes[lH][lW]
 		if newNode.h == end.GetH() && newNode.w == end.GetW() {
+			nodes[end.GetH()][end.GetW()].visited = true
 			score = newNode.weight
 			return
 		}
@@ -62,9 +69,54 @@ func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, 
 	}
 	recu(&nodes[start.GetH()][start.GetW()], facingRight)
 
+	var walkBack func(h, w int)
+	walkBack = func(h, w int) {
+		logNode(nodes[h][w], "Check seats for node")
+		if seats[h][w] || walls[h][w] {
+			logNode(nodes[h][w], "Node not visited or already seated")
+			return
+		}
+		seats[h][w] = true
+		if nodes[h][w].weight == 0 {
+			return
+		}
+		seatNo++
+		walkBackNodes := []node{
+			nodes[h+1][w],
+			nodes[h][w+1],
+			nodes[h-1][w],
+			nodes[h][w-1],
+		}
+		weights := make([]int, 0, 4)
+		for _, n := range walkBackNodes {
+			if walls[n.h][n.w] {
+				continue
+			}
+			logNode(n, "Near seats")
+			weights = append(weights, n.weight)
+		}
+
+		sort.Ints(weights)
+		log.Debug().Ints("weights", weights).Msg("walkback weights")
+		for _, n := range walkBackNodes {
+			if walls[n.h][n.w] {
+				continue
+			}
+			if n.weight != weights[0] {
+				continue
+			}
+			walkBack(n.h, n.w)
+		}
+	}
+	walkBack(end.GetH(), end.GetW())
+
 	fmt.Println()
 	for h := range height {
 		for w := range width {
+			if seats[h][w] {
+				fmt.Print("O")
+				continue
+			}
 			if nodes[h][w].visited {
 				fmt.Print("/")
 				continue
@@ -82,7 +134,7 @@ func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, 
 		fmt.Println()
 	}
 
-	return score
+	return score, seatNo
 }
 
 func measurePossibility(currentNode *node, nodes [][]node, visibleNodes map[string]helpers.DefaultPoint, walls [][]bool, rH, rW, height, width, sourceFacing int, isTurn bool) {
