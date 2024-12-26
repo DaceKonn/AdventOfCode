@@ -18,7 +18,10 @@ func getMaze(runeMatrix [][]rune, height, width int) (nodes [][]node, walls [][]
 			case 'S':
 				start = helpers.NewDefaultPoint(h, w)
 				nodes[h][w] = newNode(h, w)
-				nodes[h][w].weight = 0
+				nodes[h][w].weight[0] = 0
+				nodes[h][w].weight[1] = 0
+				nodes[h][w].weight[2] = 0
+				nodes[h][w].weight[3] = 0
 			case 'E':
 				end = helpers.NewDefaultPoint(h, w)
 				nodes[h][w] = newNode(h, w)
@@ -40,7 +43,7 @@ type node struct {
 	sourceH      int
 	sourceW      int
 	sourceFacing int
-	weight       int
+	weight       map[int]int
 }
 
 func (n node) id() string {
@@ -48,6 +51,10 @@ func (n node) id() string {
 }
 
 func newNode(h, w int) node {
+	faceWeights := make(map[int]int)
+	for i := 0; i < 4; i++ {
+		faceWeights[i] = math.MaxInt32
+	}
 	return node{
 		h,
 		w,
@@ -55,6 +62,6 @@ func newNode(h, w int) node {
 		-1,
 		-1,
 		-1,
-		math.MaxInt32,
+		faceWeights,
 	}
 }

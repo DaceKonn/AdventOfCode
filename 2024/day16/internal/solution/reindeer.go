@@ -2,6 +2,7 @@ package solution
 
 import (
 	"fmt"
+	"math"
 	"sort"
 
 	"github.com/DaceKonn/AdventOfCode/2024/day16/helpers"
@@ -39,33 +40,33 @@ func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, 
 		nodes[currentNode.h][currentNode.w].visited = true
 		switch currentFacing {
 		case facingUp:
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h-1, currentNode.w, height, width, currentFacing, false)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w+1, height, width, facingRight, true)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w-1, height, width, facingLeft, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h-1, currentNode.w, height, width, currentFacing, currentFacing, false)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w+1, height, width, currentFacing, facingRight, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w-1, height, width, currentFacing, facingLeft, true)
 		case facingRight:
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w+1, height, width, currentFacing, false)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h+1, currentNode.w, height, width, facingDown, true)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h-1, currentNode.w, height, width, facingUp, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w+1, height, width, currentFacing, currentFacing, false)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h+1, currentNode.w, height, width, currentFacing, facingDown, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h-1, currentNode.w, height, width, currentFacing, facingUp, true)
 		case facingDown:
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h+1, currentNode.w, height, width, currentFacing, false)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w+1, height, width, facingRight, true)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w-1, height, width, facingLeft, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h+1, currentNode.w, height, width, currentFacing, currentFacing, false)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w+1, height, width, currentFacing, facingRight, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w-1, height, width, currentFacing, facingLeft, true)
 		case facingLeft:
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w-1, height, width, currentFacing, false)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h+1, currentNode.w, height, width, facingDown, true)
-			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h-1, currentNode.w, height, width, facingUp, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h, currentNode.w-1, height, width, currentFacing, currentFacing, false)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h+1, currentNode.w, height, width, currentFacing, facingDown, true)
+			measurePossibility(currentNode, nodes, visibleNodes, walls, currentNode.h-1, currentNode.w, height, width, currentFacing, facingUp, true)
 		}
-		lH, lW := getLowest(visibleNodes, nodes)
+		lH, lW, lF := getLowest(visibleNodes, nodes)
 		if lH == 0 || lW == 0 {
 			return
 		}
 		newNode := &nodes[lH][lW]
 		if newNode.h == end.GetH() && newNode.w == end.GetW() {
 			nodes[end.GetH()][end.GetW()].visited = true
-			score = newNode.weight
+			score = newNode.weight[currentFacing]
 			return
 		}
-		recu(newNode, newNode.sourceFacing)
+		recu(newNode, lF)
 	}
 	recu(&nodes[start.GetH()][start.GetW()], facingRight)
 
@@ -77,35 +78,33 @@ func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, 
 			return
 		}
 		seats[h][w] = true
-		if nodes[h][w].weight == 0 {
+		seatNo++
+		if nodes[h][w].weight[0] == 0 {
 			return
 		}
-		seatNo++
+		weights := make([]int, 0, 4)
 		walkBackNodes := []node{
 			nodes[h+1][w],
-			nodes[h][w+1],
 			nodes[h-1][w],
+			nodes[h][w+1],
 			nodes[h][w-1],
 		}
-		weights := make([]int, 0, 4)
 		for _, n := range walkBackNodes {
-			if walls[n.h][n.w] {
-				continue
+			for _, v := range n.weight {
+				weights = append(weights, v)
 			}
-			logNode(n, "Near seats")
-			weights = append(weights, n.weight)
 		}
 
 		sort.Ints(weights)
 		log.Debug().Ints("weights", weights).Msg("walkback weights")
+
 		for _, n := range walkBackNodes {
-			if walls[n.h][n.w] {
-				continue
+			for _, v := range n.weight {
+				if v != weights[0] {
+					continue
+				}
+				walkBack(n.h, n.w)
 			}
-			if n.weight != weights[0] {
-				continue
-			}
-			walkBack(n.h, n.w)
 		}
 	}
 	walkBack(end.GetH(), end.GetW())
@@ -137,7 +136,16 @@ func solveMaze(nodes [][]node, walls [][]bool, start, end helpers.DefaultPoint, 
 	return score, seatNo
 }
 
-func measurePossibility(currentNode *node, nodes [][]node, visibleNodes map[string]helpers.DefaultPoint, walls [][]bool, rH, rW, height, width, sourceFacing int, isTurn bool) {
+func measurePossibility(
+	currentNode *node,
+	nodes [][]node,
+	visibleNodes map[string]helpers.DefaultPoint,
+	walls [][]bool,
+	rH, rW, height, width, currentFacing, newFacing int,
+	isTurn bool,
+) {
+	logNode(*currentNode, "Scanning from point")
+	log.Debug().Int("new-facing", newFacing).Msg("With facing")
 	if rH < 0 || rW < 0 || rH >= height || rW >= width {
 		log.Debug().Msg("Scan out of bounds")
 		return
@@ -146,57 +154,84 @@ func measurePossibility(currentNode *node, nodes [][]node, visibleNodes map[stri
 		log.Debug().Msg("Scanned wall")
 		return
 	}
+	potentialWeight := nodes[currentNode.h][currentNode.w].weight[currentNode.sourceFacing] + 1
+	log.Debug().Int("potential", potentialWeight).Msg("Potential weight")
+	if isTurn {
+		potentialWeight += 1000
+	}
 	if nodes[rH][rW].visited {
 		logNode(nodes[rH][rW], "Scan already visited")
 		return
 	}
-	potentialWeight := currentNode.weight + 1
-	if isTurn {
-		potentialWeight += 1000
-	}
-	if nodes[rH][rW].weight < potentialWeight {
+	if nodes[rH][rW].weight[currentFacing] < potentialWeight {
+		logNode(nodes[rH][rW], "Already scanned with lower weight")
 		return
 	}
-	nodes[rH][rW].weight = potentialWeight
+	nodes[rH][rW].weight[currentFacing] = potentialWeight
 	nodes[rH][rW].sourceH = rH
 	nodes[rH][rW].sourceW = rW
-	nodes[rH][rW].sourceFacing = sourceFacing
+	nodes[rH][rW].sourceFacing = currentFacing
 	if _, exists := visibleNodes[nodes[rH][rW].id()]; !exists {
 		logNode(nodes[rH][rW], "Scanned new node")
 		visibleNodes[nodes[rH][rW].id()] = helpers.NewDefaultPoint(rH, rW)
 	}
 }
 
-func getLowest(visibleNodes map[string]helpers.DefaultPoint, nodes [][]node) (h, w int) {
+func getLowest(visibleNodes map[string]helpers.DefaultPoint, nodes [][]node) (h, w, f int) {
 	log.Debug().Msg("Getting lowest")
 	var currentSelected node
+	var currentFacing int
+	var currentScore int
+	init := true
 	for _, v := range visibleNodes {
 		n := nodes[v.GetH()][v.GetW()]
 		if n.visited {
 			logNode(n, "Already visited")
 			continue
 		}
-		if currentSelected == (node{}) {
+		if init {
 			logNode(n, "Potentially next")
 			currentSelected = n
+			currentScore, currentFacing = lowestByFacing(n)
+			init = false
 			continue
 		}
-		if currentSelected.weight < n.weight {
+		newScore, newFacing := lowestByFacing(n)
+		if currentScore < newScore {
 			logNode(n, "Not low enough")
 			continue
 		}
 		currentSelected = n
+		currentFacing = newFacing
+		currentScore = newScore
 		logNode(currentSelected, "Newest low")
 	}
 	logNode(currentSelected, "Selected lowest")
-	return currentSelected.h, currentSelected.w
+	return currentSelected.h, currentSelected.w, currentFacing
+}
+
+func lowestByFacing(n node) (score, facing int) {
+	lowestV := math.MaxInt32
+	lowestK := -1
+	for k, v := range n.weight {
+		if v >= lowestV {
+			continue
+		}
+		lowestV = v
+		lowestK = k
+	}
+	return lowestV, lowestK
 }
 
 func logNode(n node, msg string) {
+	w := ""
+	for k, v := range n.weight {
+		w += fmt.Sprintf("[%d]-[%d] | ", k, v)
+	}
 	log.Debug().
 		Int("h", n.h).
 		Int("w", n.w).
-		Int("weight", n.weight).
+		Str("weight", w).
 		Int("sourceFacing", n.sourceFacing).
 		Int("sourceH", n.sourceH).
 		Int("sourceW", n.sourceW).
